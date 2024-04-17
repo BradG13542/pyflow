@@ -55,7 +55,7 @@ fn replace_distutils(setup_path: &Path) {
 
 /// Remove scripts. Used when uninstalling.
 fn remove_scripts(scripts: &[String], scripts_path: &Path) {
-    // todo: Likely not a great approach. QC.
+    // TODO: Likely not a great approach. QC.
     for entry in
         fs::read_dir(scripts_path).expect("Problem reading dist directory when removing scripts")
     {
@@ -92,11 +92,11 @@ if __name__ == '__main__':
 
 /// Find `dist-info` folder for package.
 fn find_dist_info_path(name: &str, version: &Version, lib_path: &Path) -> PathBuf {
-    let mut dist_info_path = lib_path.join(format!("{}-{}.dist-info", name, version.to_string()));
+    let mut dist_info_path = lib_path.join(format!("{}-{}.dist-info", name, version));
     // If we can't find the dist_info path, it may be due to it not using a full 3-digit semver format.
-    if !dist_info_path.exists() && (version.patch == Some(0) || version.patch == None) {
+    if !dist_info_path.exists() && (version.patch == Some(0) || version.patch.is_none()) {
         dist_info_path = lib_path.join(format!("{}-{}.dist-info", name, version.to_string_med()));
-        if !dist_info_path.exists() && (version.minor == Some(0) || version.minor == None) {
+        if !dist_info_path.exists() && (version.minor == Some(0) || version.minor.is_none()) {
             dist_info_path =
                 lib_path.join(format!("{}-{}.dist-info", name, version.to_string_short()));
         }
@@ -111,9 +111,9 @@ pub fn setup_scripts(name: &str, version: &Version, lib_path: &Path, entry_pt_pa
     let mut scripts = vec![];
     let dist_info_path = find_dist_info_path(name, version, lib_path);
 
-    if let Ok(ep_file) = fs::File::open(&dist_info_path.join("entry_points.txt")) {
+    if let Ok(ep_file) = fs::File::open(dist_info_path.join("entry_points.txt")) {
         let mut in_scripts_section = false;
-        for line in io::BufReader::new(ep_file).lines().flatten() {
+        for line in io::BufReader::new(ep_file).lines().map_while(Result::ok) {
             if line.contains("[console_scripts]") {
                 in_scripts_section = true;
                 continue;
@@ -124,14 +124,14 @@ pub fn setup_scripts(name: &str, version: &Version, lib_path: &Path, entry_pt_pa
             }
             if in_scripts_section && !line.is_empty() {
                 // Remove potential leading spaces; have seen indents included.
-                scripts.push(line.clone().replace(" ", ""));
+                scripts.push(line.clone().replace(' ', ""));
             }
         }
     } // else: Probably no scripts.
 
     // Now that we've found scripts, add them to our unified file.
     // Note that normally, python uses a bin directory.
-    //    // todo: Currently we're setting up the unified file, and the bin/script file.
+    //    // TODO: Currently we're setting up the unified file, and the bin/script file.
     //    let scripts_file = &lib_path.join("../console_scripts.txt");
     //    if !scripts_file.exists() {
     //        fs::File::create(scripts_file).expect("Problem creating console_scripts.txt");
@@ -140,7 +140,7 @@ pub fn setup_scripts(name: &str, version: &Version, lib_path: &Path, entry_pt_pa
     //    let mut existing_scripts =
     //        fs::read_to_string(scripts_file).expect("Can't find console_scripts.txt");
 
-    if !entry_pt_path.exists() && fs::create_dir(&entry_pt_path).is_err() {
+    if !entry_pt_path.exists() && fs::create_dir(entry_pt_path).is_err() {
         util::abort("Problem creating script path")
     }
 
@@ -190,7 +190,7 @@ pub fn download_and_install_package(
         let mut resp = reqwest::get(url)?; // Download the file
         let mut out =
             fs::File::create(&archive_path).expect("Failed to save downloaded package file");
-        // todo: DRY between here and py_versions.
+        // TODO: DRY between here and py_versions.
         if let Err(e) = io::copy(&mut resp, &mut out) {
             // Clean up the downloaded file, or we'll get an error next time.
             fs::remove_file(&archive_path).expect("Problem removing the broken file");
@@ -239,7 +239,7 @@ pub fn download_and_install_package(
             util::extract_zip(&archive_file, &paths.lib, &rename, &None);
         }
         PackageType::Source => {
-            // todo: Support .tar.bz2
+            // TODO: Support .tar.bz2
             if archive_path.extension().unwrap() == "bz2" {
                 util::abort(&format!(
                     "Extracting source packages in the `.bz2` format isn't supported \
@@ -338,7 +338,7 @@ pub fn download_and_install_package(
                 })
                 .as_str();
 
-            // todo: This fs_extras move does a full copy. Normal fs lib doesn't include
+            // TODO: This fs_extras move does a full copy. Normal fs lib doesn't include
             // todo moves, only copies. Figure out how to do a normal move,
             // todo, to speed this up.
 
@@ -396,7 +396,7 @@ pub fn download_and_install_package(
             {
                 let output = Command::new("python3")
                     .current_dir(&extracted_parent)
-                    .args(&["setup.py", "bdist_wheel"])
+                    .args(["setup.py", "bdist_wheel"])
                     .output()
                     .unwrap_or_else(|_| {
                         panic!(
@@ -455,7 +455,7 @@ pub fn download_and_install_package(
 
             let moved_path = paths.lib.join(&built_wheel_filename);
 
-            // todo: Again, try to move vice copy.
+            // TODO: Again, try to move vice copy.
             let options = fs_extra::file::CopyOptions::new();
             fs_extra::file::move_file(dist_path.join(&built_wheel_filename), &moved_path, &options)
                 .expect("Problem copying wheel built from source");
@@ -492,22 +492,22 @@ pub fn uninstall(name_ins: &str, vers_ins: &Version, lib_path: &Path) {
         vers_ins.to_string_color()
     );
     #[cfg(target_os = "linux")]
-    println!("🗑 Uninstalling {}: {}...", name_ins, vers_ins.to_string());
+    println!("🗑 Uninstalling {}: {}...", name_ins, vers_ins);
     #[cfg(target_os = "macos")]
-    println!("🗑 Uninstalling {}: {}...", name_ins, vers_ins.to_string());
+    println!("🗑 Uninstalling {}: {}...", name_ins, vers_ins);
 
     // Uninstall the package
     // package folders appear to be lowercase, while metadata keeps the package title's casing.
 
     let dist_info_path = find_dist_info_path(name_ins, vers_ins, lib_path);
-    let egg_info_path = lib_path.join(format!("{}-{}.egg-info", name_ins, vers_ins.to_string()));
+    let egg_info_path = lib_path.join(format!("{}-{}.egg-info", name_ins, vers_ins));
 
-    // todo: could top_level.txt be in egg-info too?
+    // TODO: could top_level.txt be in egg-info too?
     // Sometimes the folder unpacked to isn't the same name as on pypi. Check for `top_level.txt`.
     let folder_names = match fs::File::open(dist_info_path.join("top_level.txt")) {
         Ok(f) => {
             let mut names = vec![];
-            for line in io::BufReader::new(f).lines().flatten() {
+            for line in io::BufReader::new(f).lines().map_while(Result::ok) {
                 names.push(line);
             }
             names
@@ -521,7 +521,7 @@ pub fn uninstall(name_ins: &str, vers_ins: &Version, lib_path: &Path) {
             // Check that if removing the folder fails.
             if fs::remove_file(lib_path.join(&format!("{}.py", folder_name))).is_err() {
                 print_color(
-                    &format!("Problem uninstalling {} {}", name_ins, vers_ins.to_string(),),
+                    &format!("Problem uninstalling {} {}", name_ins, vers_ins,),
                     Color::Red, // Dark
                 );
             }
@@ -548,8 +548,7 @@ pub fn uninstall(name_ins: &str, vers_ins: &Version, lib_path: &Path) {
     }
 
     // Remove the data directory, if it exists.
-    fs::remove_dir_all(lib_path.join(format!("{}-{}.data", name_ins, vers_ins.to_string())))
-        .unwrap_or(());
+    fs::remove_dir_all(lib_path.join(format!("{}-{}.data", name_ins, vers_ins))).unwrap_or(());
 
     // Remove console scripts.
     remove_scripts(&[name_ins.into()], &lib_path.join("../bin"));
@@ -575,14 +574,14 @@ pub fn rename_package_files(top_path: &Path, old: &str, new: &str) {
 
         let mut data = fs::read_to_string(&path).expect("Problem reading file while renaming");
 
-        // todo: More flexible with regex?
+        // TODO: More flexible with regex?
         data = data.replace(
             &format!("from {} import", old),
             &format!("from {} import", new),
         );
         data = data.replace(&format!("from {}.", old), &format!("from {}.", new));
         data = data.replace(&format!("import {}", old), &format!("import {}", new));
-        // Todo: Is this one too general? Supersedes the first. Needed for things like `add_newdoc('numpy.core.multiarray...`
+        // TODO: Is this one too general? Supersedes the first. Needed for things like `add_newdoc('numpy.core.multiarray...`
         data = data.replace(&format!("{}.", old), &format!("{}.", new));
 
         fs::write(path, data).expect("Problem writing file while renaming");
@@ -591,7 +590,7 @@ pub fn rename_package_files(top_path: &Path, old: &str, new: &str) {
 
 /// Rename metadata files.
 pub fn rename_metadata(path: &Path, _old: &str, new: &str) {
-    // todo: Handle multiple items in top_level. Figure out how to handle that.
+    // TODO: Handle multiple items in top_level. Figure out how to handle that.
     let top_file = path.join("top_level.txt");
     //    let mut top_data = fs::read_to_string(&top_file).expect("Problem opening top_level.txt");
 
@@ -599,7 +598,7 @@ pub fn rename_metadata(path: &Path, _old: &str, new: &str) {
 
     fs::write(top_file, top_data).expect("Problem writing file while renaming");
 
-    // todo: Modify other files like entry_points.txt, perhaps.
+    // TODO: Modify other files like entry_points.txt, perhaps.
 }
 
 /// Clone a git repo of a Python package, and build/install a wheel from it.
@@ -614,11 +613,11 @@ pub fn download_and_install_git(
         fs::create_dir_all(git_path).expect("Problem creating git path");
     }
 
-    let folder_name = util::standardize_name(name); // todo: Will this always work?
+    let folder_name = util::standardize_name(name); // TODO: Will this always work?
                                                     //    match url {
                                                     //        GitPath::Git(url) => {
                                                     // Download the repo into the pyflow folder.
-                                                    // todo: Handle checking if it's current and correct; not just a matching folder
+                                                    // TODO: Handle checking if it's current and correct; not just a matching folder
                                                     // todo name.
     if !&git_path.join(&folder_name).exists() && commands::download_git_repo(url, git_path).is_err()
     {
@@ -641,7 +640,7 @@ pub fn download_and_install_git(
         // We assume that the module code is in the repo's immediate subfolder that has
         // the package's name.
         .current_dir(&git_path.join(&folder_name))
-        .args(&["setup.py", "bdist_wheel"])
+        .args(["setup.py", "bdist_wheel"])
         .output()
         .expect("Problem running setup.py bdist_wheel");
     util::check_command_output(&output, "running setup.py bdist_wheel");
@@ -654,10 +653,10 @@ pub fn download_and_install_git(
     // We've built the wheel; now move it into the lib path, as we would for a wheel download
     // from Pypi.
     let options = fs_extra::file::CopyOptions::new();
-    fs_extra::file::move_file(&archive_path, paths.lib.join(&filename), &options)
+    fs_extra::file::move_file(&archive_path, paths.lib.join(filename), &options)
         .expect("Problem moving the wheel.");
 
-    let archive_path = &paths.lib.join(&filename);
+    let archive_path = &paths.lib.join(filename);
     let archive_file = util::open_archive(archive_path);
 
     util::extract_zip(&archive_file, &paths.lib, &None, &None);
@@ -680,7 +679,7 @@ pub fn download_and_install_git(
     setup_scripts(name, &metadata.version, &paths.lib, &paths.entry_pt);
 
     // Remove the created and moved wheel
-    if fs::remove_file(&archive_path).is_err() {
+    if fs::remove_file(archive_path).is_err() {
         util::abort(&format!(
             "Problem removing this wheel built from a git repo: {:?}",
             archive_path

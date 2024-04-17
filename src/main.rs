@@ -198,7 +198,7 @@ fn main() {
         }
 
         SubCommand::Uninstall { packages } => {
-            // todo: uninstall dev?
+            // TODO: uninstall dev?
             // Remove dependencies specified in the CLI from the config, then lock and sync.
 
             let removed_reqs: Vec<String> = packages

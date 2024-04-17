@@ -10,7 +10,7 @@ use crate::dep_parser::parse_version;
 use std::str::FromStr;
 
 /// Run a standalone script file, with package management
-/// todo: We're using script name as unique identifier; address this in the future,
+/// TODO: We're using script name as unique identifier; address this in the future,
 /// todo perhaps with an id in a comment at the top of a file
 pub fn run_script(
     script_env_path: &Path,
@@ -22,8 +22,8 @@ pub fn run_script(
     #[cfg(debug_assertions)]
     eprintln!("Run script args: {:?}", args);
 
-    // todo: DRY with run_cli_tool and subcommand::Install
-    let filename = if let Some(arg) = args.get(0) {
+    // TODO: DRY with run_cli_tool and subcommand::Install
+    let filename = if let Some(arg) = args.first() {
         arg
     } else {
         util::abort(
@@ -31,7 +31,7 @@ pub fn run_script(
         );
     };
 
-    // todo: Consider a metadata file, but for now, we'll use folders
+    // TODO: Consider a metadata file, but for now, we'll use folders
     //    let scripts_data_path = script_env_path.join("scripts.toml");
 
     let env_path = util::canon_join(script_env_path, filename);
@@ -53,7 +53,7 @@ pub fn run_script(
         cfg_vers = Version::from_str(
             &fs::read_to_string(py_vers_path)
                 .expect("Problem reading Python version for this script")
-                .replace("\n", ""),
+                .replace('\n', ""),
         )
         .expect("Problem parsing version from file");
     } else {
@@ -134,10 +134,10 @@ pub fn run_script(
 /// Create the `py_vers.txt` if it doesn't exist, and then store `cfg_vers` within.
 fn create_or_update_version_file(py_vers_path: &Path, cfg_vers: &Version) {
     if !py_vers_path.exists() {
-        fs::File::create(&py_vers_path)
+        fs::File::create(py_vers_path)
             .expect("Problem creating a file to store the Python version for this script");
     }
-    fs::write(py_vers_path, &cfg_vers.to_string()).expect("Problem writing Python version file.");
+    fs::write(py_vers_path, cfg_vers.to_string()).expect("Problem writing Python version file.");
 }
 
 /// Find a script's Python version specificion by looking for the `__python__` variable.
@@ -175,7 +175,7 @@ fn check_for_specified_py_vers(script: &str) -> Option<Version> {
 
 /// Find a script's dependencies from a variable: `__requires__ = [dep1, dep2]`
 fn find_deps_from_script(script: &str) -> Vec<String> {
-    // todo: Helper for this type of logic? We use it several times in the program.
+    // TODO: Helper for this type of logic? We use it several times in the program.
     let re = Regex::new(r"(?ms)^__requires__\s*=\s*\[(.*?)\]$").unwrap();
 
     let mut result = vec![];
@@ -184,13 +184,7 @@ fn find_deps_from_script(script: &str) -> Vec<String> {
         let deps_list = c.get(1).unwrap().as_str().to_owned();
         result = deps_list
             .split(',')
-            .map(|d| {
-                d.to_owned()
-                    .replace(" ", "")
-                    .replace("'", "")
-                    .replace("\"", "")
-                    .replace("\n", "")
-            })
+            .map(|d| d.to_owned().replace([' ', '\'', '"', '\n'], ""))
             .filter(|d| !d.is_empty())
             .collect();
     }

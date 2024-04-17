@@ -30,7 +30,7 @@ pub struct PresentConfig {
 
 /// A config, parsed from pyproject.toml
 #[derive(Clone, Debug, Default, Deserialize)]
-// todo: Auto-desr some of these
+// TODO: Auto-desr some of these
 pub struct Config {
     pub name: Option<String>,
     pub py_version: Option<Version>,
@@ -50,7 +50,7 @@ pub struct Config {
     pub readme: Option<String>,
     pub build: Option<String>, // A python file used to build non-python extensions
     //    entry_points: HashMap<String, Vec<String>>, // todo option?
-    pub scripts: HashMap<String, String>, //todo: put under [tool.pyflow.scripts] ?
+    pub scripts: HashMap<String, String>, //TODO: put under [tool.pyflow.scripts] ?
     //    console_scripts: Vec<String>, // We don't parse these; pass them to `setup.py` as-entered.
     pub python_requires: Option<String>,
 }
@@ -122,9 +122,9 @@ impl Config {
         result
     }
 
-    // todo: DRY at the top from `from_file`.
+    // TODO: DRY at the top from `from_file`.
     pub fn from_pipfile(path: &Path) -> Option<Self> {
-        // todo: Lots of tweaks and QC could be done re what fields to parse, and how best to
+        // TODO: Lots of tweaks and QC could be done re what fields to parse, and how best to
         // todo parse and store them.
         let toml_str = match fs::read_to_string(path).ok() {
             Some(d) => d,
@@ -151,7 +151,7 @@ impl Config {
     /// Pull config data from `pyproject.toml`. We use this to deserialize things like Versions
     /// and requirements.
     pub fn from_file(path: &Path) -> Option<Self> {
-        // todo: Lots of tweaks and QC could be done re what fields to parse, and how best to
+        // TODO: Lots of tweaks and QC could be done re what fields to parse, and how best to
         // todo parse and store them.
         let toml_str = match fs::read_to_string(path) {
             Ok(d) => d,
@@ -192,7 +192,7 @@ impl Config {
             if let Some(v) = po.build {
                 result.build = Some(v);
             }
-            // todo: Process entry pts, classifiers etc?
+            // TODO: Process entry pts, classifiers etc?
             if let Some(v) = po.classifiers {
                 result.classifiers = v;
             }
@@ -216,9 +216,9 @@ impl Config {
                 )
             }
 
-            // todo: DRY (c+p) from pyflow dependency parsing, other than parsing python version here,
+            // TODO: DRY (c+p) from pyflow dependency parsing, other than parsing python version here,
             // todo which only poetry does.
-            // todo: Parse poetry dev deps
+            // TODO: Parse poetry dev deps
             if let Some(deps) = po.dependencies {
                 for (name, data) in deps {
                     let constraints;
@@ -244,7 +244,7 @@ impl Config {
                         }
                     }
                     if &name.to_lowercase() == "python" {
-                        if let Some(constr) = constraints.get(0) {
+                        if let Some(constr) = constraints.first() {
                             result.py_version = Some(constr.version.clone())
                         }
                     } else {
@@ -288,7 +288,7 @@ impl Config {
                 result.repository = Some(v);
             }
 
-            // todo: Process entry pts, classifiers etc?
+            // TODO: Process entry pts, classifiers etc?
             if let Some(v) = pf.classifiers {
                 result.classifiers = v;
             }
@@ -392,7 +392,7 @@ impl Config {
             result.push_str(&(format!("homepage = \"{}\"", v) + "\n"));
         }
 
-        // todo: More fields
+        // TODO: More fields
 
         result.push('\n');
         result.push_str("[tool.pyflow.scripts]\n");
@@ -455,7 +455,7 @@ fn pop_reqs_helper(reqs: &[Req], dev: bool) -> Vec<Req> {
 
         // Check for metadata of a built wheel
         for folder_name in util::find_folders(&req_path) {
-            // todo: Dry from `util` and `install`.
+            // TODO: Dry from `util` and `install`.
             let re_dist = Regex::new(r"^(.*?)-(.*?)\.dist-info$").unwrap();
             if re_dist.captures(&folder_name).is_some() {
                 let metadata_path = req_path.join(folder_name).join("METADATA");

@@ -147,7 +147,7 @@ pub fn find_bin_path(vers_path: &Path) -> PathBuf {
 /// Wait for directories to be created; required between modifying the filesystem,
 /// and running code that depends on the new files.
 pub fn wait_for_dirs(dirs: &[PathBuf]) -> Result<(), crate::py_versions::AliasError> {
-    // todo: AliasError is a quick fix to avoid creating new error type.
+    // TODO: AliasError is a quick fix to avoid creating new error type.
     let timeout = 1000; // ms
     for _ in 0..timeout {
         let mut all_created = true;
@@ -203,7 +203,7 @@ pub fn find_installed(lib_path: &Path) -> Vec<(String, Version, Vec<String>)> {
             let mut tops = vec![];
             match fs::File::open(top_level) {
                 Ok(f) => {
-                    for line in BufReader::new(f).lines().flatten() {
+                    for line in BufReader::new(f).lines().map_while(Result::ok) {
                         tops.push(line);
                     }
                 }
@@ -319,7 +319,7 @@ pub fn merge_reqs(
 }
 
 pub fn standardize_name(name: &str) -> String {
-    name.to_lowercase().replace('-', "_").replace('.', "_")
+    name.to_lowercase().replace(['-', '.'], "_")
 }
 
 // PyPi naming isn't consistent; it capitalization and _ vs -
@@ -386,12 +386,12 @@ pub fn extract_zip(
 
         let outpath = out_path.join(extracted_file.unwrap());
 
-        if (&*file.name()).ends_with('/') {
+        if (file.name()).ends_with('/') {
             fs::create_dir_all(&outpath).unwrap();
         } else {
             if let Some(p) = outpath.parent() {
                 if !p.exists() {
-                    fs::create_dir_all(&p).unwrap();
+                    fs::create_dir_all(p).unwrap();
                 }
             }
             let mut outfile = fs::File::create(&outpath).unwrap();
@@ -458,7 +458,7 @@ pub fn find_or_create_venv(
             py_vers = Version::new_opt(vers.major, vers.minor, None); // Don't include patch.
         }
         1 => {
-            vers_path = pypackages_dir.join(&format!(
+            vers_path = pypackages_dir.join(format!(
                 "{}.{}",
                 compatible_venvs[0].0, compatible_venvs[0].1
             ));
@@ -466,7 +466,7 @@ pub fn find_or_create_venv(
         }
         _ => {
             abort(
-                // todo: Handle this, eg by letting the user pick the one to use?
+                // TODO: Handle this, eg by letting the user pick the one to use?
                 "Multiple compatible Python environments found
                 for this project.",
             )
@@ -526,7 +526,7 @@ pub fn find_or_create_venv(
 
 /// Used when the version might be an error, eg user input
 pub fn fallible_v_parse(vers: &str) -> Version {
-    let vers = vers.replace(" ", "").replace("\n", "").replace("\r", "");
+    let vers = vers.replace([' ', '\n', '\r'], "");
     if let Ok(v) = Version::from_str(&vers) {
         v
     } else {
@@ -626,7 +626,7 @@ pub fn find_best_release(
 
     let best_release;
     let package_type;
-    // todo: Sort further / try to match exact python_version if able.
+    // TODO: Sort further / try to match exact python_version if able.
     if compatible_releases.is_empty() {
         if source_releases.is_empty() {
             abort(&format!(
@@ -670,7 +670,7 @@ pub fn get_git_author() -> Vec<String> {
 }
 
 pub fn find_first_file(path: &Path) -> PathBuf {
-    // todo: Propagate errors rather than abort here?
+    // TODO: Propagate errors rather than abort here?
     {
         // There should only be one file in this dist folder: The wheel we're looking for.
         for entry in path
@@ -692,7 +692,7 @@ pub fn find_first_file(path: &Path) -> PathBuf {
 /// Mainly to avoid repeating error-handling code.
 pub fn open_archive(path: &Path) -> fs::File {
     // We must re-open the file after computing the hash.
-    if let Ok(f) = fs::File::open(&path) {
+    if let Ok(f) = fs::File::open(path) {
         f
     } else {
         abort(&format!(
@@ -723,7 +723,7 @@ pub fn parse_metadata(path: &Path) -> Metadata {
             result.requires_dist.push(req);
         }
     }
-    // todo: For now, just pull version and requires_dist. Add more as-required.
+    // TODO: For now, just pull version and requires_dist. Add more as-required.
     result
 }
 
@@ -821,7 +821,7 @@ pub fn process_reqs(reqs: Vec<Req>, git_path: &Path, paths: &util::Paths) -> Vec
     // git_reqs is used to store requirements from packages installed via git.
     let mut git_reqs = vec![]; // For path reqs too.
     for req in reqs.iter().filter(|r| r.git.is_some()) {
-        // todo: as_ref() would be better than clone, if we can get it working.
+        // TODO: as_ref() would be better than clone, if we can get it working.
         let mut metadata = install::download_and_install_git(
             &req.name,
             //  util::GitPath::Git(req.git.clone().unwrap()),

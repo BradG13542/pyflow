@@ -73,7 +73,7 @@ fn cfg_to_setup(cfg: &crate::Config) -> String {
 
     let mut author = "".to_string();
     let mut author_email = "".to_string();
-    if let Some(first) = cfg.authors.get(0) {
+    if let Some(first) = cfg.authors.first() {
         let caps = if let Some(c) = author_re.captures(first) {
             c
         } else {
@@ -88,7 +88,7 @@ fn cfg_to_setup(cfg: &crate::Config) -> String {
 
     let deps: Vec<String> = cfg.reqs.iter().map(Req::to_setup_py_string).collect();
 
-    // todo: Entry pts!
+    // TODO: Entry pts!
     format!(
         r#"import setuptools
 
@@ -171,9 +171,9 @@ pub fn build(
 
     // Twine has too many dependencies to install when the environment, like we do with `wheel`, and
     // for now, it's easier to install using pip
-    // todo: Install using own tools instead of pip; this is the last dependence on pip.
+    // TODO: Install using own tools instead of pip; this is the last dependence on pip.
     let output = Command::new(paths.bin.join("python"))
-        .args(&["-m", "pip", "install", "twine"])
+        .args(["-m", "pip", "install", "twine"])
         .output()
         .expect("Problem installing Twine");
     util::check_command_output(&output, "failed to install twine");
@@ -195,10 +195,10 @@ pub fn build(
 
     util::set_pythonpath(&[paths.lib.to_owned()]);
     println!("🛠️️ Building the package...");
-    // todo: Run build script first, right?
+    // TODO: Run build script first, right?
     if let Some(build_file) = &cfg.build {
         let output = Command::new(paths.bin.join("python"))
-            .arg(&build_file)
+            .arg(build_file)
             .output()
             .unwrap_or_else(|_| panic!("Problem building using {}", build_file));
         util::check_command_output(&output, "failed to run build script");
@@ -230,7 +230,7 @@ pub(crate) fn publish(bin_path: &Path, cfg: &crate::Config) {
 
     println!("Uploading to {}", repo_url);
     let output = Command::new(bin_path.join("twine"))
-        .args(&["upload", "--repository-url", &repo_url, "dist/*"])
+        .args(["upload", "--repository-url", &repo_url, "dist/*"])
         .output()
         .expect("Problem publishing");
     util::check_command_output(&output, "publishing");
@@ -344,7 +344,7 @@ setuptools.setup(
         assert_eq!(expected, actual);
     }
 
-    // todo: Re-impl if you end up using this
+    // TODO: Re-impl if you end up using this
     //    #[test]
     //    fn py_dict() {
     //        let expected = r#"{

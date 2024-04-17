@@ -43,16 +43,16 @@ pub fn new(name: &str) {
 /// Create a template directory for a python project.
 fn new_internal(name: &str) -> Result<(), Box<dyn Error>> {
     if !PathBuf::from(name).exists() {
-        fs::create_dir_all(&format!("{}/{}", name, name.replace("-", "_")))?;
-        fs::File::create(&format!("{}/{}/__init__.py", name, name.replace("-", "_")))?;
-        fs::File::create(&format!("{}/README.md", name))?;
-        fs::File::create(&format!("{}/.gitignore", name))?;
+        fs::create_dir_all(format!("{}/{}", name, name.replace('-', "_")))?;
+        fs::File::create(format!("{}/{}/__init__.py", name, name.replace('-', "_")))?;
+        fs::File::create(format!("{}/README.md", name))?;
+        fs::File::create(format!("{}/.gitignore", name))?;
     }
 
     let readme_init = &format!("# {}\n\n{}", name, "(A description)");
 
-    fs::write(&format!("{}/.gitignore", name), GITIGNORE_INIT)?;
-    fs::write(&format!("{}/README.md", name), readme_init)?;
+    fs::write(format!("{}/.gitignore", name), GITIGNORE_INIT)?;
+    fs::write(format!("{}/README.md", name), readme_init)?;
 
     let cfg = Config {
         name: Some(name.to_string()),

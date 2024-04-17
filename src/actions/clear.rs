@@ -34,10 +34,10 @@ pub fn clear(pyflow_path: &Path, cache_path: &Path, script_env_path: &Path) {
         false,
     );
 
-    // todo: DRY
+    // TODO: DRY
     match result.1 {
         ClearChoice::Dependencies => {
-            if fs::remove_dir_all(&cache_path).is_err() {
+            if fs::remove_dir_all(cache_path).is_err() {
                 abort(&format!(
                     "Problem removing the dependency-cache path: {:?}",
                     cache_path
@@ -45,7 +45,7 @@ pub fn clear(pyflow_path: &Path, cache_path: &Path, script_env_path: &Path) {
             }
         }
         ClearChoice::ScriptEnvs => {
-            if fs::remove_dir_all(&script_env_path).is_err() {
+            if fs::remove_dir_all(script_env_path).is_err() {
                 abort(&format!(
                     "Problem removing the script env path: {:?}",
                     script_env_path
@@ -54,7 +54,7 @@ pub fn clear(pyflow_path: &Path, cache_path: &Path, script_env_path: &Path) {
         }
         ClearChoice::PyInstalls => {}
         ClearChoice::All => {
-            if fs::remove_dir_all(&pyflow_path).is_err() {
+            if fs::remove_dir_all(pyflow_path).is_err() {
                 abort(&format!(
                     "Problem removing the Pyflow path: {:?}",
                     pyflow_path

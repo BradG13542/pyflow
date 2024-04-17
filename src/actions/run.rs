@@ -11,7 +11,7 @@ pub fn run(lib_path: &Path, bin_path: &Path, vers_path: &Path, cfg: &Config, arg
         return;
     }
 
-    let name = if let Some(a) = args.get(0) {
+    let name = if let Some(a) = args.first() {
         a.clone()
     } else {
         abort("`run` must be followed by the script to run, eg `pyflow run black`");
@@ -19,7 +19,7 @@ pub fn run(lib_path: &Path, bin_path: &Path, vers_path: &Path, cfg: &Config, arg
 
     // If the script we're calling is specified in `pyproject.toml`, ensure it exists.
 
-    // todo: Delete these scripts as required to sync with pyproject.toml.
+    // TODO: Delete these scripts as required to sync with pyproject.toml.
     let re = Regex::new(r"(.*?):(.*)").unwrap();
 
     let mut specified_args: Vec<String> = args.into_iter().skip(1).collect();

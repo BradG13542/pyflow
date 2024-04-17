@@ -23,9 +23,9 @@ impl fmt::Display for _ExecutionError {
     }
 }
 
-/// Todo: Dry from `find_py_version`
+/// TODO: Dry from `find_py_version`
 pub fn find_py_dets(alias: &str) -> Option<String> {
-    let output = Command::new(alias).args(&["--version, --version"]).output();
+    let output = Command::new(alias).args(["--version, --version"]).output();
 
     let output_bytes = match output {
         Ok(ob) => {
@@ -84,7 +84,7 @@ pub fn find_py_version(alias: &str) -> Option<crate::Version> {
 pub fn create_venv(py_alias: &str, lib_path: &Path, name: &str) -> Result<(), Box<dyn Error>> {
     // While creating the lib path, we're creating the __pypackages__ structure.
     let output = Command::new(py_alias)
-        .args(&["-m", "venv", name])
+        .args(["-m", "venv", name])
         .current_dir(lib_path.join("../"))
         .output()?;
     util::check_command_output(&output, "creating virtual environment");
@@ -92,11 +92,11 @@ pub fn create_venv(py_alias: &str, lib_path: &Path, name: &str) -> Result<(), Bo
     Ok(())
 }
 
-// todo: DRY for using a path instead of str. use impl Into<PathBuf> ?
+// TODO: DRY for using a path instead of str. use impl Into<PathBuf> ?
 pub fn create_venv2(py_alias: &Path, lib_path: &Path, name: &str) -> Result<(), Box<dyn Error>> {
     // While creating the lib path, we're creating the __pypackages__ structure.
     let output = Command::new(py_alias)
-        .args(&["-m", "venv", name])
+        .args(["-m", "venv", name])
         .current_dir(lib_path.join("../"))
         .output()?;
     util::check_command_output(&output, "creating virtual environment");
@@ -120,15 +120,15 @@ pub fn run_python(
 }
 
 pub fn download_git_repo(repo: &str, dest_path: &Path) -> Result<(), Box<dyn Error>> {
-    // todo: Download directly instead of using git clone?
-    // todo: Suppress this output.
+    // TODO: Download directly instead of using git clone?
+    // TODO: Suppress this output.
     if Command::new("git").arg("--version").status().is_err() {
         util::abort("Can't find Git on the PATH. Is it installed?");
     }
 
     let output = Command::new("git")
         .current_dir(dest_path)
-        .args(&["clone", repo])
+        .args(["clone", repo])
         .output()?;
     util::check_command_output(&output, "cloning repo");
     Ok(())
@@ -138,7 +138,7 @@ pub fn download_git_repo(repo: &str, dest_path: &Path) -> Result<(), Box<dyn Err
 pub fn git_init(dir: &Path) -> Result<(), Box<dyn Error>> {
     let output = Command::new("git")
         .current_dir(dir)
-        .args(&["init", "--quiet"])
+        .args(["init", "--quiet"])
         .output()?;
     util::check_command_output(&output, "initializing git repository");
     Ok(())

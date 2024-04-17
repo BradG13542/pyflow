@@ -12,7 +12,7 @@ pub fn switch(version: &str) {
     pcfg.config.py_version = Some(specified.clone());
     files::change_py_vers(&PathBuf::from(&pcfg.config_path), &specified);
     util::print_color(
-        &format!("Switched to Python version {}", specified.to_string()),
+        &format!("Switched to Python version {}", specified),
         Color::Green,
     );
     // Don't exit program here; now that we've changed the cfg version, let's run the normal flow.

@@ -25,7 +25,7 @@ pub fn py_vers() -> Version {
         .expect("Unable to read user input for version");
 
     input.pop(); // Remove trailing newline.
-    let input = input.replace("\n", "").replace("\r", "");
+    let input = input.replace(['\n', '\r'], "");
     if !input.is_empty() {
         fallible_v_parse(&input)
     } else {

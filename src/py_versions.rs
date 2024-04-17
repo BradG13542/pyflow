@@ -156,8 +156,8 @@ impl PyVers {
 }
 
 /// Only Oses we've built and hosted
-/// todo: How cross-compat are these? Eg work across diff versions of Ubuntu?
-/// todo: 32-bit
+/// TODO: How cross-compat are these? Eg work across diff versions of Ubuntu?
+/// TODO: 32-bit
 #[derive(Clone, Copy, Debug)]
 #[allow(dead_code)]
 enum Os {
@@ -241,7 +241,7 @@ fn download(py_install_path: &Path, version: &Version) {
     );
 
     // eg `python-3.7.4-ubuntu.tar.xz`
-    let archive_path = py_install_path.join(&format!("python-{}-{}.tar.xz", vers_to_dl, os_str));
+    let archive_path = py_install_path.join(format!("python-{}-{}.tar.xz", vers_to_dl, os_str));
     if !archive_path.exists() {
         // Save the file
         util::print_color(
@@ -262,11 +262,11 @@ fn download(py_install_path: &Path, version: &Version) {
     util::unpack_tar_xz(&archive_path, py_install_path);
 
     // Strip the OS tag from the extracted Python folder name
-    let extracted_path = py_install_path.join(&format!("python-{}", vers_to_dl));
+    let extracted_path = py_install_path.join(format!("python-{}", vers_to_dl));
 
     fs::rename(
-        py_install_path.join(&format!("python-{}-{}", vers_to_dl, os_str)),
-        &extracted_path,
+        py_install_path.join(format!("python-{}-{}", vers_to_dl, os_str)),
+        extracted_path,
     )
     .expect("Problem renaming extracted Python folder");
 }
@@ -343,7 +343,7 @@ fn find_installed_versions(pyflow_dir: &Path) -> Vec<Version> {
     #[cfg(target_os = "macos")]
     let py_name = "bin/python3";
 
-    if !&pyflow_dir.exists() && fs::create_dir_all(&pyflow_dir).is_err() {
+    if !&pyflow_dir.exists() && fs::create_dir_all(pyflow_dir).is_err() {
         util::abort("Problem creating the Pyflow directory")
     }
 
@@ -403,7 +403,7 @@ pub fn create_venv(
     let installed_versions = find_installed_versions(pyflow_dir);
     for iv in &installed_versions {
         if iv.major == cfg_v.major && iv.minor == cfg_v.minor {
-            let folder_name = format!("python-{}", iv.to_string());
+            let folder_name = format!("python-{}", iv);
             alias_path = Some(pyflow_dir.join(folder_name).join(&py_name));
             py_ver = Some(iv.clone());
             break;
@@ -413,7 +413,7 @@ pub fn create_venv(
     // todo perhaps move alias finding back into create_venv, or make a
     // todo create_venv_if_doesnt_exist fn.
     // Only search for a system Python if we don't have an internal one.
-    // todo: Why did we choose to prioritize portable over system? Perhaps do the
+    // TODO: Why did we choose to prioritize portable over system? Perhaps do the
     // todo other way around.
     if py_ver.is_none() {
         let aliases = find_py_aliases(cfg_v);
@@ -516,7 +516,7 @@ pub fn create_venv(
     #[cfg(target_os = "linux")]
     let venv_lib_path = PathBuf::from(lib).join(&format!("python{}", py_ver.to_string_med()));
     #[cfg(target_os = "macos")]
-    let venv_lib_path = PathBuf::from(lib).join(&format!("python{}", py_ver.to_string_med()));
+    let venv_lib_path = PathBuf::from(lib).join(format!("python{}", py_ver.to_string_med()));
 
     let paths = util::Paths {
         bin: bin_path.clone(),

@@ -75,7 +75,7 @@ pub enum VersionModifier {
     Alpha,
     Beta,
     ReleaseCandidate,
-    Dep, // todo: Not sure what this is, but have found it.
+    Dep, // TODO: Not sure what this is, but have found it.
     // Used to allow comparisons between versions that have and don't have modifiers.
     Null,
     Other(String),
@@ -229,10 +229,10 @@ impl Version {
     /// Prevents repetition.
     fn add_str_mod(&self, s: &mut String) {
         if let Some(extra_num) = self.extra_num {
-            s.push_str(&format!(".{}", extra_num.to_string()));
+            s.push_str(&format!(".{}", extra_num));
         }
         if let Some((modifier, num)) = self.modifier.clone() {
-            s.push_str(&format!("{}{}", modifier.to_string(), num.to_string()));
+            s.push_str(&format!("{}{}", modifier.to_string(), num));
         }
     }
 
@@ -390,7 +390,7 @@ impl fmt::Display for Version {
         };
         if self.major.is_some() {
             let mut star_handled = false;
-            let parts = vec![self.minor, self.patch, self.extra_num];
+            let parts = [self.minor, self.patch, self.extra_num];
             for part in parts.iter() {
                 if let Some(p) = part {
                     version.push('.');
@@ -506,7 +506,7 @@ impl Constraint {
     /// From a comma-separated list
     pub fn from_str_multiple(vers: &str) -> Result<Vec<Self>, DependencyError> {
         let mut result = vec![];
-        let vers = vers.replace(" ", "");
+        let vers = vers.replace(' ', "");
         let vers = if vers.is_empty() {
             ">=2.0".to_string()
         } else {
@@ -549,7 +549,7 @@ impl Constraint {
                 _ => (),
             }
         }
-        format!("{}{}", type_str, self.version.to_string())
+        format!("{}{}", type_str, self.version)
     }
 
     /// Find the lowest and highest compatible versions. Return a vec, since the != requirement type
@@ -771,14 +771,14 @@ pub fn intersection_many(constrs: &[Constraint]) -> Vec<(Version, Version)> {
         }
         ranges.push(rng2);
     }
-    // todo: We haven't included nes!
+    // TODO: We haven't included nes!
     intersection_many2(&ranges)
 }
 
 /// Interface an arbitrary number of constraint sets into the intersection fn(s), which
 /// handle 2 at a time.
 fn intersection_many2(reqs: &[(Version, Version)]) -> Vec<(Version, Version)> {
-    // todo: Broken for notequals, which involves joining two ranges with OR logic.
+    // TODO: Broken for notequals, which involves joining two ranges with OR logic.
     let init = vec![(Version::new(0, 0, 0), Version::new(MAX_VER, 0, 0))];
     reqs.iter().fold(init, |acc, constraint_set| {
         intersection(&[constraint_set.clone()], &acc)
@@ -833,7 +833,7 @@ pub struct Req {
     pub python_version: Option<Vec<Constraint>>,
     pub install_with_extras: Option<Vec<String>>,
     pub path: Option<String>,
-    pub git: Option<String>, // String is the git repo. // todo: Branch
+    pub git: Option<String>, // String is the git repo. // TODO: Branch
 }
 
 impl Req {
@@ -994,8 +994,7 @@ impl Req {
                 .collect::<Vec<String>>()
                 .join(",")
         )
-        .replace("^", ">")
-        .replace("~", ">") // todo: Sloppy, but perhaps the best way.
+        .replace(['^', '~'], ">") // TODO: Sloppy, but perhaps the best way.
     }
 }
 
@@ -1024,7 +1023,7 @@ impl fmt::Display for Req {
 #[derive(Clone, Debug)]
 pub enum Rename {
     No,
-    // todo: May not need to store self id.
+    // TODO: May not need to store self id.
     Yes(u32, u32, String), // parent id, self id, name
 }
 
@@ -1044,7 +1043,7 @@ pub struct Package {
 pub struct LockPackage {
     // We use Strings here instead of types like Version to make it easier to
     // serialize and deserialize
-    // todo: We have an analog Package type; perhaps just figure out how to serialize that.
+    // TODO: We have an analog Package type; perhaps just figure out how to serialize that.
     pub id: u32, // used for tracking renames
     pub name: String,
     pub version: String,
@@ -1924,7 +1923,7 @@ pub mod tests {
     }
 
     #[test]
-    // todo: Test many with more than 2 sets.
+    // TODO: Test many with more than 2 sets.
     fn intersections_simple_many() {
         let reqs1 = vec![
             Constraint::new(Gte, Version::new(4, 9, 4)),

@@ -87,7 +87,7 @@ fn guess_graph(
     extras: &[String],
     py_vers: &Version,
     result: &mut Vec<Dependency>, // parent id, self id.
-    cache: &mut HashMap<(String, Version), Vec<&ReqCache>>,
+    _cache: &mut HashMap<(String, Version), Vec<&ReqCache>>,
     vers_cache: &mut HashMap<String, (String, Version, Vec<Version>)>,
     reqs_searched: &mut Vec<Req>,
 ) -> Result<(), DependencyError> {
@@ -112,7 +112,7 @@ fn guess_graph(
                     if req.extra.is_none() && c.extra.is_some() {
                         c.extra = None
                     }
-                    // todo: Should merge sys_platform, python_version, install_with_extras too.
+                    // TODO: Should merge sys_platform, python_version, install_with_extras too.
                 }
             }
 
@@ -201,7 +201,7 @@ fn guess_graph(
         let requires_dist = package
             .deps
             .iter()
-            .map(|(_, name, vers)| format!("{} (=={})", name, vers.to_string()))
+            .map(|(_, name, vers)| format!("{} (=={})", name, vers))
             .collect();
 
         // Note that we convert from normal data types to strings here, for the sake of consistency
@@ -214,7 +214,7 @@ fn guess_graph(
         });
     }
 
-    // todo: We must take locked ids into account, or will bork renames on subsequent runs!
+    // TODO: We must take locked ids into account, or will bork renames on subsequent runs!
 
     // We've now merged the query data with locked data. A difference though, is we've already
     // narrowed down the locked ones to one version with an exact constraint.
@@ -276,7 +276,7 @@ fn guess_graph(
             req.install_with_extras.as_ref().unwrap_or(&vec![]),
             py_vers,
             result,
-            cache,
+            _cache,
             vers_cache,
             reqs_searched,
         ) {
@@ -462,7 +462,7 @@ pub(super) mod res {
     }
 
     /// Pull data on pydeps for a req. Only pull what we need.
-    /// todo: Group all reqs and pull with a single call to pydeps to improve speed?
+    /// TODO: Group all reqs and pull with a single call to pydeps to improve speed?
     pub(super) fn fetch_req_data(
         reqs: &[Req],
         vers_cache: &mut HashMap<String, (String, Version, Vec<Version>)>,
@@ -472,7 +472,7 @@ pub(super) mod res {
 
         let mut query_data = HashMap::new();
         for req in reqs {
-            // todo: cache version info; currently may get this multiple times.
+            // TODO: cache version info; currently may get this multiple times.
             let (_, latest_version, all_versions) = match vers_cache.get(&req.name) {
                 Some(c) => c.clone(),
                 None => {
@@ -494,7 +494,7 @@ pub(super) mod res {
             let mut max_v_to_query = latest_version;
 
             // Find the maximum version compatible with the constraints.
-            // todo: May need to factor in additional constraints here, and put
+            // TODO: May need to factor in additional constraints here, and put
             // todo in fn signature for things that don't resolve with the optimal soln.
             for constr in &req.constraints {
                 // For Ne, we have two ranges; the second one being ones higher than the version specified.
@@ -612,10 +612,10 @@ pub(super) mod res {
 
     /// Assign dependencies to packages-to-install, for use in the lock file.
     /// Do this only after the dependencies are resolved.
-    fn assign_subdeps(packages: &mut Vec<Package>, updated_ids: &HashMap<u32, u32>) {
+    fn assign_subdeps(packages: &mut [Package], updated_ids: &HashMap<u32, u32>) {
         // We run through the non-cleaned deps first, since the parent may point to
         // one that didn't make the cut, including cases where the versions were identical.
-        let packs2 = packages.clone(); // to search
+        let packs2 = packages.to_owned(); // to search
         for package in packages.iter_mut() {
             let mut children: Vec<(u32, String, Version)> = packs2
                 .iter()
@@ -730,7 +730,7 @@ pub(super) mod res {
                     // and rename as-required(By which criteria? the older one?). This ensures our
                     // graph is always resolveable, and avoids diving through the graph recursively,
                     // dealing with cycles etc. There may be ways around this in some cases.
-                    // todo: Renaming may not work if the renamed dep uses compiled code.
+                    // TODO: Renaming may not work if the renamed dep uses compiled code.
 
                     let newest_compatible = deps
                         .iter()
@@ -808,7 +808,7 @@ pub(super) mod res {
                             rename: Rename::No,
                         });
 
-                        // todo: Do a check on newest_unresolved! If fails, execute renamed plan
+                        // TODO: Do a check on newest_unresolved! If fails, execute renamed plan
 
                         for dep in deps {
                             // note that we push the old ids, so we can update the subdeps with the new versions.
@@ -833,31 +833,32 @@ pub(super) mod res {
 }
 #[cfg(test)]
 pub mod tests {
-    use super::res::*;
-    use super::*;
+    // use super::res::*;
+    // use super::*;
 
-    #[test]
-    fn warehouse_versions() {
-        // Makes API call
-        // Assume no new releases since writing this test.
-        assert_eq!(
-            get_version_info("scinot", None).unwrap().2.sort(),
-            vec![
-                Version::new(0, 0, 1),
-                Version::new(0, 0, 2),
-                Version::new(0, 0, 3),
-                Version::new(0, 0, 4),
-                Version::new(0, 0, 5),
-                Version::new(0, 0, 6),
-                Version::new(0, 0, 7),
-                Version::new(0, 0, 8),
-                Version::new(0, 0, 9),
-                Version::new(0, 0, 10),
-                Version::new(0, 0, 11),
-            ]
-            .sort()
-        );
-    }
+    // #[test]
+    // fn warehouse_versions() {
+    //     let expected =
+    //     // Makes API call
+    //     // Assume no new releases since writing this test.
+    //     assert_eq!(
+    //         get_version_info("scinot", None).unwrap().2.sort(),
+    //         vec![
+    //             Version::new(0, 0, 1),
+    //             Version::new(0, 0, 2),
+    //             Version::new(0, 0, 3),
+    //             Version::new(0, 0, 4),
+    //             Version::new(0, 0, 5),
+    //             Version::new(0, 0, 6),
+    //             Version::new(0, 0, 7),
+    //             Version::new(0, 0, 8),
+    //             Version::new(0, 0, 9),
+    //             Version::new(0, 0, 10),
+    //             Version::new(0, 0, 11),
+    //         ]
+    //         .sort()
+    //     );
+    // }
 
     //    #[test]
     //    fn warehouse_deps() {
@@ -901,5 +902,5 @@ pub mod tests {
     // todo Add more of these, for variety.
     //    }
 
-    // todo: Make dep-resolver tests, including both simple, conflicting/resolvable, and confliction/unresolvable.
+    // TODO: Make dep-resolver tests, including both simple, conflicting/resolvable, and confliction/unresolvable.
 }

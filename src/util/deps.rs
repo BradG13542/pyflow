@@ -54,8 +54,8 @@ pub fn sync(
         })
         .collect();
 
-    // todo: Only show this when needed.
-    // todo: Temporarily? Removed.
+    // TODO: Only show this when needed.
+    // TODO: Temporarily? Removed.
     // Powershell  doesn't like emojis
     //    #[cfg(target_os = "windows")]
     //    println!("Resolving dependencies...");
@@ -67,7 +67,7 @@ pub fn sync(
     // Dev reqs and normal reqs are both installed here; we only commit dev reqs
     // when packaging.
     let mut combined_reqs = reqs.to_vec();
-    for dev_req in dev_reqs.to_vec() {
+    for dev_req in dev_reqs.iter().cloned() {
         combined_reqs.push(dev_req);
     }
 
@@ -111,8 +111,7 @@ pub fn sync(
             version: package.version.to_string(),
             source: Some(format!(
                 "pypi+https://pypi.org/pypi/{}/{}/json",
-                package.name,
-                package.version.to_string()
+                package.name, package.version
             )),
             dependencies: Some(deps),
             rename: match &package.rename {
@@ -124,7 +123,7 @@ pub fn sync(
 
     let updated_lock = Lock {
         //        metadata: Some(lock_metadata),
-        metadata: HashMap::new(), // todo: Problem with toml conversion.
+        metadata: HashMap::new(), // TODO: Problem with toml conversion.
         package: Some(updated_lock_packs.clone()),
     };
     if util::write_lock(lock_path, &updated_lock).is_err() {
@@ -189,7 +188,7 @@ fn sync_deps(
         })
         .collect();
 
-    // todo: Once you include rename info in installed, you won't need to use the map logic here.
+    // TODO: Once you include rename info in installed, you won't need to use the map logic here.
     let packages_only: Vec<&(String, Version)> = packages.iter().map(|(p, _)| p).collect();
     let to_uninstall: Vec<&(String, Version)> = installed
         .iter()
@@ -218,7 +217,7 @@ fn sync_deps(
         .collect();
 
     for (name, version) in &to_uninstall {
-        // todo: Deal with renamed. Currently won't work correctly with them.
+        // TODO: Deal with renamed. Currently won't work correctly with them.
         install::uninstall(name, version, &paths.lib)
     }
 
@@ -265,7 +264,7 @@ fn sync_deps(
             util::wait_for_dirs(&[renamed_path.clone()]).expect("Problem creating renamed path");
             install::rename_package_files(renamed_path, name, new);
 
-            // Rename in the parent calling the renamed package. // todo: Multiple parents?
+            // Rename in the parent calling the renamed package. // TODO: Multiple parents?
             let parent = lock_packs
                 .iter()
                 .find(|lp| lp.id == *id)
@@ -276,11 +275,9 @@ fn sync_deps(
                 new,
             );
 
-            // todo: Handle this more generally, in case we don't have proper semver dist-info paths.
+            // TODO: Handle this more generally, in case we don't have proper semver dist-info paths.
             install::rename_metadata(
-                &paths
-                    .lib
-                    .join(&format!("{}-{}.dist-info", name, version.to_string())),
+                &paths.lib.join(&format!("{}-{}.dist-info", name, version)),
                 name,
                 new,
             );

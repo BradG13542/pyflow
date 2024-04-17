@@ -8,7 +8,7 @@ homepage = "https://www.github.com/David-OConnor/pyflow"
 repository = "https://www.github.com/David-OConnor/pyflow"
 readme = "README.md"
 edition = "2018"
-keywords = ["python","dependency", "packaging", "build"]
+keywords = ["python", "dependency", "packaging", "build"]
 categories = ["development-tools::build-utils"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -27,17 +27,23 @@ regex = "^1.1.9"
 ring = "^0.16.9"
 # We disable, by omission, suggestions, so it doesn't think `pyflow ipython` is a misspelling
 # of `pyflow python`.
-structopt = { version = "^0.3.3", default_features = false, features = ["color", "wrap_help", "doc"] }
-serde = {version = "^1.0.101", features = ["derive"]}
+structopt = { version = "^0.3.3", default_features = false, features = [
+    "color",
+    "wrap_help",
+    "doc",
+] }
+serde = { version = "^1.0.101", features = ["derive"] }
 tar = "^0.4.26"
 toml = "^0.5.1"
 zip = "^0.5.2"
 nom = "^5.1.2"
 # We don't use native TLS, to avoid dependency issues on different linux distros.
-reqwest = { version = "^0.9.21", default-features = false, features = ["rustls-tls"] }
+reqwest = { version = "^0.9.21", default-features = false, features = [
+    "rustls-tls",
+] }
 
 # Vendorize OpenSSl on Linux, to avoid compatibility problems.
-# todo: target-specific features aren't currently supported.
+# TODO: target-specific features aren't currently supported.
 #[target.'cfg(target_os = "linux")'.dependencies]
 #reqwest = { version = "^0.9.21", default-features = false, features = ["rustls-tls"] }
 #

@@ -65,7 +65,7 @@ pub struct DepComponentPoetry {
     pub python: Option<String>,
     pub extras: Option<Vec<String>>,
     pub optional: Option<bool>,
-    // todo: more fields
+    // TODO: more fields
     //    pub repository: Option<String>,
     //    pub branch: Option<String>,
     //    pub service: Option<String>,
@@ -117,7 +117,7 @@ pub struct Poetry {
 
     pub dependencies: Option<HashMap<String, DepComponentWrapperPoetry>>,
     pub dev_dependencies: Option<HashMap<String, DepComponentWrapperPoetry>>,
-    // todo: Include these
+    // TODO: Include these
     //    pub source: Option<HashMap<String, String>>,
     pub scripts: Option<HashMap<String, String>>,
     //    pub extras: Option<HashMap<String, String>>,
@@ -159,7 +159,7 @@ fn collect_section(cfg_lines: &[String], title: &str) -> Option<Section> {
         }
 
         // This must be the last step of the loop to work properly
-        if line.replace(" ", "") == title {
+        if line.replace(' ', "") == title {
             existing_entries.push(title.into());
             i_start = i;
             in_section = true;
@@ -191,9 +191,9 @@ fn extend_or_insert(mut cfg_lines: Vec<String>, section_header: &str, reqs: &[Re
             // and later we append a trailing empty line
             let mut all_deps: Vec<String> = section
                 .lines
-                .to_owned()
-                .into_iter()
-                .filter(|x| !x.is_empty())
+                .iter()
+                .filter(|&x| !x.is_empty())
+                .cloned()
                 .collect();
 
             for req in reqs {
@@ -267,8 +267,8 @@ pub fn add_reqs_to_cfg(cfg_path: &Path, added: &[Req], added_dev: &[Req]) {
 
 /// Remove dependencies from pyproject.toml.
 pub fn remove_reqs_from_cfg(cfg_path: &Path, reqs: &[String]) {
-    // todo: Handle removing dev deps.
-    // todo: DRY from parsing the config.
+    // TODO: Handle removing dev deps.
+    // TODO: DRY from parsing the config.
     let mut result = String::new();
     let data = fs::read_to_string(cfg_path)
         .expect("Unable to read pyproject.toml while attempting to add a dependency");
@@ -305,7 +305,7 @@ pub fn remove_reqs_from_cfg(cfg_path: &Path, reqs: &[String]) {
             if sect_re.is_match(line) {
                 in_dep = false;
             }
-            // todo: handle comments
+            // TODO: handle comments
             let req_line = if let Ok(r) = Req::from_str(line, false) {
                 r
             } else {
@@ -341,7 +341,7 @@ pub fn parse_req_dot_text(cfg: &mut Config, path: &Path) {
         Err(_) => return,
     };
 
-    for line in BufReader::new(file).lines().flatten() {
+    for line in BufReader::new(file).lines().map_while(Result::ok) {
         match Req::from_pip_str(&line) {
             Some(r) => {
                 cfg.reqs.push(r.clone());
@@ -356,12 +356,12 @@ pub fn parse_req_dot_text(cfg: &mut Config, path: &Path) {
 
 /// Update the config file with a new version.
 pub fn change_py_vers(cfg_path: &Path, specified: &Version) {
-    let f = fs::File::open(&cfg_path)
+    let f = fs::File::open(cfg_path)
         .expect("Unable to read pyproject.toml while adding Python version");
     let mut new_data = String::new();
-    for line in BufReader::new(f).lines().flatten() {
+    for line in BufReader::new(f).lines().map_while(Result::ok) {
         if line.starts_with("py_version") {
-            new_data.push_str(&format!("py_version = \"{}\"\n", specified.to_string()));
+            new_data.push_str(&format!("py_version = \"{}\"\n", specified));
         } else {
             new_data.push_str(&line);
             new_data.push('\n');
